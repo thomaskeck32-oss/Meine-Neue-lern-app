@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kälte-Meister App</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#020617">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="toast"></div>
+<main id="app">
+<section id="menu" class="panel">
+<div class="title"><div><h1>❄️ Kälte-Meister</h1><p class="sub">Version 1.0 – fertiges Offline-Lernspiel</p></div><div class="rank" id="rankBox">Azubi</div></div>
+<input id="playerName" placeholder="Dein Name">
+<label>Thema wählen</label>
+<select id="topicSelect"></select>
+<div class="row">
+<button onclick="startGame('normal')">🎮 Prüfungsspiel</button>
+<button onclick="startGame('learn')">📚 Lernmodus</button>
+<button onclick="startGame('time')">⏱️ Zeitmodus</button>
+<button onclick="startGame('marathon')">🏁 Meisterprüfung</button>
+</div>
+<div class="row">
+<button onclick="showStats()">📊 Statistik</button>
+<button onclick="showAchievements()">🎖️ Erfolge</button>
+<button onclick="showShop()">🎨 Shop</button>
+<button onclick="resetSave()">🗑️ Reset</button>
+</div>
+<p id="saveInfo"></p>
+</section>
+
+<section id="game" class="panel hidden">
+<div class="top">
+<div id="hud"></div>
+<button class="small" onclick="goMenu()">Menü</button>
+</div>
+<div class="bar"><div id="progress"></div></div>
+<div class="meta"><span id="topic"></span><span id="timer"></span></div>
+<h2 id="question"></h2>
+<div class="row">
+<button id="jokerBtn" class="small" onclick="useJoker()">🎲 50:50 Joker</button>
+<button id="skipBtn" class="small" onclick="skipQuestion()">⏭️ Frage tauschen</button>
+</div>
+<div id="answers"></div>
+<p id="explanation"></p>
+<button id="nextBtn" class="hidden" onclick="nextQuestion()">Weiter</button>
+</section>
+
+<section id="statsPanel" class="panel hidden">
+<h2 id="panelTitle">Statistik</h2>
+<div id="statsText"></div>
+<button onclick="goMenu()">Zurück</button>
+</section>
+</main>
+<script src="questions.js"></script>
+<script src="script.js"></script>
+<script>if('serviceWorker' in navigator){navigator.serviceWorker.register('service-worker.js');}</script>
+</body>
+</html>
