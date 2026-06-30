@@ -1,2 +1,2 @@
-Kälte-Meister v3.1
-Alle Dateien im GitHub-Pages-Repository ersetzen. Danach Safari neu laden oder App neu zum Home-Bildschirm hinzufügen.
+Kälte-Meister Theorie Lernapp
+Alle Dateien in GitHub Pages hochladen. Auf iPhone in Safari öffnen und zum Home-Bildschirm hinzufügen.

@@ -1,20 +1,82 @@
+let state={mode:"learn",deck:[],i:0,ok:0,total:0,topic:"Alle"};
+let stats=JSON.parse(localStorage.getItem("km_simple_stats")||'{"ok":0,"all":0,"byTopic":{}}');
 
-let state={name:"Azubi",mode:"normal",lives:3,score:0,xp:0,level:1,coins:0,streak:0,bestStreak:0,index:0,deck:[],answered:0,correct:0,bossCounter:0,highscore:0,joker:1,skip:1,selectedTopic:"Alle",timeLeft:90,timerId:null,topicStats:{},achievements:[],playedTopics:[],skin:"",mult:1};
-function rank(){if(state.level>=10)return"Meister";if(state.level>=7)return"Servicetechniker";if(state.level>=4)return"Monteur";return"Azubi"}function setupTopics(){topicSelect.innerHTML=TOPICS.map(t=>`<option>${t}</option>`).join("")}
-function load(){let r=localStorage.getItem("kaelteMeisterSave");if(r){try{Object.assign(state,JSON.parse(r))}catch(e){}}playerName.value=state.name||"";rankBox.textContent=rank();saveInfo.textContent=`Gespeichert: ${state.name||"Azubi"} | ${rank()} Level ${state.level} | Highscore ${state.highscore||0} | Coins ${state.coins||0}`;applySkin()}
-function save(){state.highscore=Math.max(state.highscore||0,state.score||0);localStorage.setItem("kaelteMeisterSave",JSON.stringify({name:state.name,xp:state.xp,level:state.level,coins:state.coins,bestStreak:state.bestStreak,highscore:state.highscore,topicStats:state.topicStats,achievements:state.achievements,playedTopics:state.playedTopics,skin:state.skin}))}
-function shuffle(a){return[...a].sort(()=>Math.random()-.5)}function toast(t){let el=document.getElementById("toast");el.textContent=t;el.classList.add("show");setTimeout(()=>el.classList.remove("show"),1600)}
-function unlock(id){if(!state.achievements.includes(id)){state.achievements.push(id);let a=ACHIEVEMENTS.find(x=>x[0]===id);if(a)toast("Erfolg: "+a[1])}}function checkAch(b=false){if(state.correct>=1)unlock("first");if(state.streak>=5)unlock("streak5");if(state.streak>=10)unlock("streak10");if(state.score>=100)unlock("score100");if(state.score>=500)unlock("score500");if(b)unlock("boss1");if(state.level>=3)unlock("level3");if(state.level>=5)unlock("level5");if(state.coins>=50)unlock("coins50");if(state.mode==="learn"&&state.answered>=20)unlock("learn20");if(state.mode==="time"&&state.answered>=10)unlock("time10");if(new Set(state.playedTopics).size>=8)unlock("allround")}
-function startGame(mode){clearInterval(state.timerId);state.name=playerName.value.trim()||"Azubi";state.mode=mode;state.lives=mode==="learn"?99:(mode==="marathon"?5:3);state.score=0;state.streak=0;state.index=0;state.answered=0;state.correct=0;state.bossCounter=0;state.joker=mode==="marathon"?3:1;state.skip=mode==="marathon"?2:1;state.mult=1;state.selectedTopic=topicSelect.value||"Alle";let pool=mode==="bossrush"?BOSSES:(state.selectedTopic==="Alle"?QUESTIONS:QUESTIONS.filter(q=>q.topic===state.selectedTopic));if(pool.length<4&&mode!=="bossrush"){pool=QUESTIONS;toast("Zu wenige Fragen im Thema, alle Fragen geladen.")}state.deck=shuffle(pool);state.timeLeft=mode==="time"?90:0;menu.classList.add("hidden");statsPanel.classList.add("hidden");game.classList.remove("hidden");if(mode==="time"){state.timerId=setInterval(()=>{state.timeLeft--;timer.textContent="⏱️ "+state.timeLeft+"s";if(state.timeLeft<=0)endGame("Zeit abgelaufen ⏱️")},1000)}draw()}
-function endGame(t){clearInterval(state.timerId);question.textContent=t;answers.innerHTML="";explanation.textContent=`Punkte: ${state.score}. Richtig: ${state.correct}/${state.answered}.`;nextBtn.classList.add("hidden");save()}
-function goMenu(){clearInterval(state.timerId);game.classList.add("hidden");statsPanel.classList.add("hidden");menu.classList.remove("hidden");save();load()}
-function currentQuestion(){if(state.mode!=="time"&&state.mode!=="cards"&&state.answered>0&&state.answered%10===0&&state.bossCounter<BOSSES.length)return BOSSES[state.bossCounter];if(state.index>=state.deck.length){if(state.mode==="marathon"||state.mode==="bossrush"){endGame("Runde beendet 🏁");return state.deck[0]}state.deck=shuffle(state.deck);state.index=0}return state.deck[state.index]}
-function randomEvent(){state.mult=1;eventBox.textContent="";if(state.answered>0&&state.answered%7===0){let ev=Math.random();if(ev<.34){state.mult=2;eventBox.textContent="⚡ Bonusrunde: nächste richtige Antwort zählt doppelt!"}else if(ev<.67){state.joker++;eventBox.textContent="🎁 Zufallsfund: +1 Joker!"}else{state.coins+=5;eventBox.textContent="🪙 Werkzeugkiste gefunden: +5 Coins!"}}}
-function draw(){if(state.lives<=0){endGame("Game Over 💀");return}randomEvent();let q=currentQuestion();hud.textContent=`👤 ${state.name} | ${rank()} | ❤️ ${state.lives} | ⭐ ${state.score} | XP ${state.xp}/100 | Level ${state.level} | 🪙 ${state.coins} | 🔥 ${state.streak}`;progress.style.width=Math.min(100,(state.answered%10)*10)+"%";topic.textContent=q.topic+(q.topic==="Bosskampf"?" 👹":` | Stufe ${q.difficulty}`);timer.textContent=state.mode==="time"?"⏱️ "+state.timeLeft+"s":"";question.textContent=q.q;answers.innerHTML="";explanation.textContent=state.mode==="cards"?"Tippe auf eine Antwort. Es zählt nicht als Fehler im Karteikartenmodus.":"";nextBtn.classList.add("hidden");jokerBtn.disabled=state.joker<=0;skipBtn.disabled=state.skip<=0;q.a.forEach((text,idx)=>{let b=document.createElement("button");b.className="ans";b.dataset.idx=idx;b.textContent=String.fromCharCode(65+idx)+") "+text;b.onclick=()=>answer(idx,b);answers.appendChild(b)})}
-function useJoker(){if(state.joker<=0)return;let q=currentQuestion();shuffle([...answers.children].filter(b=>Number(b.dataset.idx)!==q.c)).slice(0,2).forEach(b=>b.disabled=true);state.joker--;jokerBtn.disabled=true;toast("50:50 genutzt")}
-function skipQuestion(){if(state.skip<=0)return;state.skip--;state.index++;toast("Frage getauscht");draw()}
-function answer(idx,btn){let q=currentQuestion();[...answers.children].forEach(b=>b.disabled=true);[...answers.children][q.c].classList.add("correct");let points=(q.topic==="Bosskampf"?50:10)*state.mult,bossCorrect=false;if(!state.topicStats[q.topic])state.topicStats[q.topic]={ok:0,all:0};state.topicStats[q.topic].all++;if(!state.playedTopics.includes(q.topic)&&q.topic!=="Bosskampf")state.playedTopics.push(q.topic);if(idx===q.c){state.score+=points;state.xp+=q.topic==="Bosskampf"?50:20;state.coins+=q.topic==="Bosskampf"?10:2;state.streak++;state.correct++;state.topicStats[q.topic].ok++;if(q.topic==="Bosskampf")bossCorrect=true;if(state.streak>state.bestStreak){state.bestStreak=state.streak;toast("Neue beste Serie! 🔥")}explanation.textContent="✅ Richtig! "+q.e}else{btn.classList.add("wrong");if(state.mode!=="cards"){state.streak=0;if(state.mode!=="learn")state.lives--;}explanation.textContent="❌ Nicht die beste Antwort. "+q.e}while(state.xp>=100){state.level++;state.xp-=100;toast("Level Up! 📈")}state.answered++;if(q.topic==="Bosskampf")state.bossCounter++;else state.index++;checkAch(bossCorrect);save();nextBtn.classList.remove("hidden");hud.textContent=`👤 ${state.name} | ${rank()} | ❤️ ${state.lives} | ⭐ ${state.score} | XP ${state.xp}/100 | Level ${state.level} | 🪙 ${state.coins} | 🔥 ${state.streak}`}
-function nextQuestion(){draw()}function showStats(){menu.classList.add("hidden");game.classList.add("hidden");statsPanel.classList.remove("hidden");panelTitle.textContent="📊 Statistik";let rows=Object.entries(state.topicStats||{}).map(([k,v])=>`<p>${k}: ${v.ok}/${v.all} richtig (${Math.round(v.ok/v.all*100)}%)</p>`).join("")||"<p>Noch keine Themenstatistik.</p>";statsText.innerHTML=`<p>👤 Name: ${state.name||"-"}</p><p>🏆 Highscore: ${state.highscore||0}</p><p>📈 Rang: ${rank()} / Level ${state.level||1}</p><p>XP: ${state.xp||0}/100</p><p>🪙 Coins: ${state.coins||0}</p><p>🔥 Beste Serie: ${state.bestStreak||0}</p><hr>${rows}`}
-function showAchievements(){menu.classList.add("hidden");game.classList.add("hidden");statsPanel.classList.remove("hidden");panelTitle.textContent="🎖️ Erfolge";statsText.innerHTML=ACHIEVEMENTS.map(a=>`<span class="badge ${state.achievements.includes(a[0])?'done':'locked'}">${state.achievements.includes(a[0])?'✅':'🔒'} ${a[1]}<br><small>${a[2]}</small></span>`).join("")}
-function showShop(){menu.classList.add("hidden");game.classList.add("hidden");statsPanel.classList.remove("hidden");panelTitle.textContent="🎨 Shop";statsText.innerHTML=`<div class="shop">Neon Skin – 25 Coins<button onclick="buySkin('neon',25)">Aktivieren/Kaufen</button></div><div class="shop">Fire Skin – 25 Coins<button onclick="buySkin('fire',25)">Aktivieren/Kaufen</button></div><div class="shop">Green Skin – 25 Coins<button onclick="buySkin('green',25)">Aktivieren/Kaufen</button></div><div class="shop">Standard<button onclick="buySkin('',0)">Aktivieren</button></div><p>Coins: ${state.coins}</p>`}
-function buySkin(skin,cost){if(cost>0&&state.skin!==skin){if(state.coins<cost){toast("Zu wenig Coins");return}state.coins-=cost}state.skin=skin;applySkin();save();toast("Skin aktiviert")}function applySkin(){document.body.className=state.skin||""}function resetSave(){if(confirm("Speicher wirklich löschen?")){localStorage.removeItem("kaelteMeisterSave");location.reload()}}setupTopics();load();
+function init(){
+  const topics=["Alle",...new Set(QUESTIONS.map(q=>q.topic))].sort();
+  topicSelect.innerHTML=topics.map(t=>`<option>${t}</option>`).join("");
+  updateStatsLine();
+}
+function updateStatsLine(){
+  const pct=stats.all?Math.round(stats.ok/stats.all*100):0;
+  statsLine.textContent=`Gesamt: ${stats.ok}/${stats.all} richtig (${pct}%)`;
+}
+function saveStats(){localStorage.setItem("km_simple_stats",JSON.stringify(stats));}
+function start(modeName){
+  state.mode=modeName; state.topic=topicSelect.value; state.i=0; state.ok=0; state.total=0;
+  let pool=state.topic==="Alle"?QUESTIONS:QUESTIONS.filter(q=>q.topic===state.topic);
+  state.deck=[...pool].sort(()=>Math.random()-.5);
+  if(modeName==="exam") state.deck=state.deck.slice(0,Math.min(20,state.deck.length));
+  menu.classList.add("hidden"); result.classList.add("hidden"); quiz.classList.remove("hidden");
+  draw();
+}
+function draw(){
+  if(state.i>=state.deck.length){finish();return;}
+  const q=state.deck[state.i];
+  mode.textContent=(state.mode==="exam"?"Prüfung":"Lernen")+` · Frage ${state.i+1}/${state.deck.length}`;
+  bar.style.width=Math.round(state.i/state.deck.length*100)+"%";
+  topic.textContent=q.topic;
+  question.textContent=q.q;
+  answers.innerHTML=""; explain.textContent=""; next.classList.add("hidden");
+  q.a.forEach((a,idx)=>{
+    const b=document.createElement("button");
+    b.className="answer";
+    b.textContent=String.fromCharCode(65+idx)+") "+a;
+    b.onclick=()=>answer(idx,b);
+    answers.appendChild(b);
+  });
+}
+function answer(idx,btn){
+  const q=state.deck[state.i];
+  [...answers.children].forEach(b=>b.disabled=true);
+  answers.children[q.c].classList.add("correct");
+  state.total++; stats.all++;
+  if(!stats.byTopic[q.topic]) stats.byTopic[q.topic]={ok:0,all:0};
+  stats.byTopic[q.topic].all++;
+  if(idx===q.c){
+    btn.classList.add("correct"); state.ok++; stats.ok++; stats.byTopic[q.topic].ok++;
+    explain.textContent="✅ Richtig! "+q.e;
+  }else{
+    btn.classList.add("wrong");
+    explain.textContent="❌ Falsch. Richtige Antwort: "+q.a[q.c]+". "+q.e;
+  }
+  saveStats();
+  next.classList.remove("hidden");
+}
+function nextQuestion(){state.i++;draw();}
+function finish(){
+  quiz.classList.add("hidden"); result.classList.remove("hidden");
+  const pct=state.total?Math.round(state.ok/state.total*100):0;
+  let html=`<p><b>${state.ok}/${state.total}</b> richtig (${pct}%).</p>`;
+  if(state.mode==="exam"){
+    html+=pct>=50?"<p>✅ Bestanden.</p>":"<p>❌ Noch üben.</p>";
+  }
+  resultText.innerHTML=html;
+  updateStatsLine();
+}
+function showStats(){
+  menu.classList.add("hidden"); result.classList.remove("hidden");
+  let html=`<p>Gesamt: ${stats.ok}/${stats.all} richtig (${stats.all?Math.round(stats.ok/stats.all*100):0}%).</p><hr>`;
+  Object.entries(stats.byTopic).forEach(([t,v])=>{
+    html+=`<p>${t}: ${v.ok}/${v.all} (${Math.round(v.ok/v.all*100)}%)</p>`;
+  });
+  resultText.innerHTML=html || "<p>Noch keine Statistik.</p>";
+}
+function resetStats(){
+  if(confirm("Statistik löschen?")){
+    stats={ok:0,all:0,byTopic:{}}; saveStats(); updateStatsLine();
+  }
+}
+function goMenu(){
+  quiz.classList.add("hidden"); result.classList.add("hidden"); menu.classList.remove("hidden"); updateStatsLine();
+}
+init();
