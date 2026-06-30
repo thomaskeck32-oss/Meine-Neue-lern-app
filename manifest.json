@@ -1,10 +1,10 @@
 {
-  "name": "Kälte-Meister Theorie",
-  "short_name": "Kälte-Theorie",
+  "name": "Kälte-Meister",
+  "short_name": "Kälte-Meister",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#071525",
-  "theme_color": "#071525",
+  "background_color": "#020617",
+  "theme_color": "#061225",
   "icons": [
     {
       "src": "icon-192.png",
