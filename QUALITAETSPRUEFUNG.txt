@@ -1,3 +1,17 @@
-Geprüft: 25 schwere Fragen + 2 Bossfragen.
-Jede Frage hat 4 Antworten, genau eine korrekte Lösung, eindeutige Erklärung.
-Fehler: keine
+Kälte-Meister v3.1 – Qualitätsprüfung
+
+Geprüfte Inhalte:
+- 56 normale Fragen
+- 4 Bossfragen
+- alle Fragen haben genau 4 Antwortmöglichkeiten
+- jede Frage hat genau eine gespeicherte richtige Antwort
+- Antworten mit offensichtlich albernen oder fachfremden Auswahlmöglichkeiten wurden entfernt
+- Fragen mit schlechten, zu leichten oder uneindeutigen Antwortmöglichkeiten wurden neu formuliert oder entfernt
+- Erklärungen sind vorhanden und fachlich auf Ursache/Wirkung bezogen
+
+Ergebnis:
+- Fehler: ['QUESTIONS 50: Erklärung zu kurz', 'QUESTIONS 55: Erklärung zu kurz', 'QUESTIONS 56: Erklärung zu kurz']
+- Hinweise: keine
+
+Hinweis:
+Die Fragen wurden auf Plausibilität und eindeutige beste Antwort geprüft. Bei Praxisfragen kann es in der Realität zusätzliche Ursachen geben; im Quiz ist jeweils die fachlich passendste Antwort zur beschriebenen Situation gesucht.
