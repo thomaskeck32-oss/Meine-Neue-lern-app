@@ -5,7 +5,6 @@
   "display": "standalone",
   "background_color": "#020617",
   "theme_color": "#020617",
-  "description": "Offline-Lernspiel für die Zwischenprüfung Mechatroniker für Kältetechnik",
   "icons": [
     {
       "src": "icon-192.png",

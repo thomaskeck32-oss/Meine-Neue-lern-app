@@ -1,0 +1,3 @@
+Geprüft: 25 schwere Fragen + 2 Bossfragen.
+Jede Frage hat 4 Antworten, genau eine korrekte Lösung, eindeutige Erklärung.
+Fehler: keine
